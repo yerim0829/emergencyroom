@@ -1,0 +1,66 @@
+# -*- coding: utf-8 -*-
+# Colab용: 선형회귀로 2023년 예측 (간단 버전)
+
+import numpy as np
+import pandas as pd
+
+# 1) 데이터 불러오기
+file_path = "/content/drive/MyDrive/emergency_seoul_data.csv"
+
+# 인코딩 이슈 대비
+try:
+    df = pd.read_csv(file_path)
+except UnicodeDecodeError:
+    df = pd.read_csv(file_path, encoding="cp949")
+
+print("shape:", df.shape)
+display(df.head())
+
+# 2) 전처리
+df = df.rename(columns={
+    '분류':'city', '항목':'bucket', '단위':'unit',
+    '2023년':'y2023', '2022년':'y2022',
+    '2021년':'y2021', '2020년':'y2020', '2019년':'y2019'
+})
+
+# 천 단위 콤마 제거 → 정수 변환
+for c in ['y2023','y2022','y2021','y2020','y2019']:
+    df[c] = df[c].astype(str).str.replace(',', '', regex=False).astype(int)
+
+# 'unit' 컬럼이 있으면 제거
+if 'unit' in df.columns:
+    df = df.drop(columns=['unit'])
+
+display(df.head())
+
+# 3) 학습/평가 데이터 분리
+from sklearn.model_selection import train_test_split
+X = df[['y2019','y2020','y2021','y2022']]
+y = df['y2023']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# 4) 모델 학습 (선형회귀)
+from sklearn.linear_model import LinearRegression
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# 5) 예측 & 성능지표 (버전 안전하게 RMSE 계산)
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+
+y_pred = model.predict(X_test)
+
+mae  = mean_absolute_error(y_test, y_pred)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))  # <-- 변경 포인트
+
+print("MAE:", mae)
+print("RMSE:", rmse)
+
+# 6) 결과 표
+result = pd.DataFrame({
+    "실제값": y_test.values,
+    "예측값": y_pred
+}).reset_index(drop=True)
+display(result)
