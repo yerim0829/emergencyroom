@@ -2,79 +2,76 @@
 
 > **Predicting Emergency Department Congestion with Synthetic Time Series and Machine Learning**
 
-[![KSC 2025](https://img.shields.io/badge/KSC-2025-blue)](포스터-PDF-링크)
+[![KSC 2025](https://img.shields.io/badge/KSC-2025-blue)](POSTER-PDF-LINK)
 
-공공 응급의료 통계 데이터를 **3시간 간격의 Synthetic Time Series**로 재구성하고,
-XGBoost · Random Forest · CNN-LSTM을 비교하여 **응급실 혼잡도를 예측**한 프로젝트입니다.
+A machine learning project that reconstructs public emergency medical statistics into a **3-hour-interval synthetic time series** and predicts emergency department congestion by comparing multiple machine learning and deep learning models.
 
-**XGBoost가 가장 낮은 MAE와 RMSE를 기록하며 가장 우수한 성능을 보였습니다.**
+Among **XGBoost, Random Forest, and CNN-LSTM**, **XGBoost achieved the lowest MAE and RMSE**, showing the best predictive performance.
 
-본 연구는 **한국정보과학회 KSC 2025**에서 포스터로 발표되었습니다.
+This research was presented as a poster at **KSC 2025, the Korea Software Congress**.
 
 ---
 
 ## 📌 Project Overview
 
-공개된 응급의료 데이터는 연도별·시간대별 **요약 통계 형태**로 제공되어
-일반적인 시계열 예측 모델에 바로 적용하기 어렵다는 한계가 있습니다.
+Publicly available emergency medical datasets are often provided as **aggregated statistics by year or time period**, making them difficult to directly apply to conventional time-series forecasting models.
 
-이를 해결하기 위해 다음과 같은 예측 파이프라인을 구성했습니다.
+To address this limitation, we designed the following prediction pipeline:
 
-**응급의료 요약 통계**
-→ **Synthetic Time Series 생성**
-→ **기상·공휴일 데이터 결합**
-→ **시계열 Feature Engineering**
-→ **모델 학습 및 비교**
-→ **향후 3시간 환자 수 예측**
+**Aggregated Emergency Medical Statistics**
+→ **Synthetic Time Series Generation**
+→ **Weather & Holiday Data Integration**
+→ **Time-Series Feature Engineering**
+→ **Model Training & Comparison**
+→ **3-Hour-Ahead Patient Volume Prediction**
 
 ---
 
 ## 📊 Dataset
 
-| Data          | Description       |
-| ------------- | ----------------- |
-| 서울시 응급의료 통계   | 2020.01 ~ 2024.12 |
-| 기상청 ASOS      | 기온, 강수량 등         |
-| Calendar Data | 공휴일, 요일 및 시간 정보   |
+| Data                               | Description                                 |
+| ---------------------------------- | ------------------------------------------- |
+| Seoul Emergency Medical Statistics | Jan. 2020 – Dec. 2024                       |
+| KMA ASOS Weather Data              | Temperature, precipitation, etc.            |
+| Calendar Data                      | Holidays, day of week, and time information |
 
-연간 단위의 응급의료 요약 통계를
-계절성·변동성·연속성을 고려하여 **3시간 간격의 시계열 데이터**로 재구성했습니다.
+The annual aggregated emergency medical statistics were reconstructed into a
+**3-hour-interval synthetic time series** while considering seasonality, variability, and continuity.
 
 ---
 
 ## ⚙️ Methodology
 
-### 1. Synthetic Time Series
+### 1. Synthetic Time Series Generation
 
-시계열 분석이 어려운 연간 요약 통계를
-**3시간 간격의 연속적인 Synthetic Time Series**로 재구성했습니다.
+Aggregated annual statistics, which were not directly suitable for time-series analysis,
+were reconstructed into a continuous **3-hour-interval synthetic time series**.
 
 ### 2. External Data Integration
 
-응급실 혼잡도에 영향을 줄 수 있는 외부 데이터를 결합했습니다.
+External variables potentially related to emergency department congestion were integrated into the dataset.
 
-* 기상청 ASOS 관측 데이터
-* 공휴일 여부
-* 요일 및 시간 정보
+* KMA ASOS weather observations
+* Holiday indicators
+* Day-of-week and time features
 
-기상 데이터는 **3시간 간격으로 리샘플링**하고 결측치를 처리했으며,
-공휴일 정보는 이진 변수로 변환했습니다.
+Weather observations were resampled at **3-hour intervals** and missing values were handled.
+Holiday information was converted into binary features.
 
 ### 3. Feature Engineering
 
-과거 혼잡도의 영향과 단기 추세를 반영하기 위해
-시계열 기반 Feature를 추가했습니다.
+Time-series features were generated to capture both residual effects of previous congestion and short-term trends.
 
-| Feature        | Description                |
-| -------------- | -------------------------- |
-| Lag Features   | 3h, 6h, 18h, 최대 72h 이전 혼잡도 |
-| Moving Average | 최근 18시간 평균                 |
-| Moving Std     | 최근 18시간 표준편차               |
+| Feature        | Description                                               |
+| -------------- | --------------------------------------------------------- |
+| Lag Features   | Congestion levels from 3h, 6h, 18h, and up to 72h earlier |
+| Moving Average | Rolling average over the previous 18 hours                |
+| Moving Std     | Rolling standard deviation over the previous 18 hours     |
 
 ### 4. Prediction Structure
 
-과거 **36시간(12 timesteps)**의 데이터를 입력으로 사용해
-**향후 3시간의 환자 수**를 예측했습니다.
+The model uses the previous **36 hours (12 timesteps)** of feature data
+to predict patient volume for the **next 3-hour interval**.
 
 ```text
 Past 36 hours
@@ -87,7 +84,7 @@ Patient Volume at t
 
 ### 5. Train / Test Split
 
-데이터 누수를 방지하기 위해 데이터를 시간 순서대로 분할했습니다.
+To prevent data leakage, the dataset was split chronologically.
 
 * **Train:** 80%
 * **Test:** 20%
@@ -97,7 +94,7 @@ Patient Volume at t
 
 ## 🤖 Models
 
-총 3개의 모델을 비교했습니다.
+Three predictive models were evaluated:
 
 * **XGBoost**
 * Random Forest
@@ -123,28 +120,28 @@ colsample_bytree = 0.8
 | Random Forest |     75.317 |     87.198 |
 | CNN-LSTM      |    128.263 |    147.019 |
 
-### Best Model — XGBoost
+### Best Performing Model — XGBoost
 
-**XGBoost가 MAE와 RMSE 모두 가장 낮은 값을 기록했습니다.**
+**XGBoost achieved the lowest MAE and RMSE among the three models.**
 
-제한된 데이터 환경에서는 복잡한 딥러닝 모델보다
-**도메인 기반 Feature Engineering + XGBoost** 조합이
-더 효과적인 예측 방법이 될 수 있음을 확인했습니다.
+The results suggest that, in a limited-data setting, the combination of
+**domain-informed feature engineering and XGBoost** can provide a more effective and resource-efficient alternative to a more complex deep learning model.
 
 ---
 
 ## 💡 Key Contributions
 
-* 요약 통계를 시계열 분석에 활용하기 위한
-  **Synthetic Time Series 재구성**
+* Reconstructed aggregated emergency medical statistics into a
+  **Synthetic Time Series** suitable for time-series forecasting
 
-* 기상·공휴일·과거 혼잡도 정보를 활용한
-  **도메인 기반 Feature Engineering**
+* Integrated weather, holiday, and historical congestion information through
+  **domain-informed feature engineering**
 
-* **XGBoost · Random Forest · CNN-LSTM** 성능 비교
+* Compared the predictive performance of
+  **XGBoost, Random Forest, and CNN-LSTM**
 
-* 공개 통계 데이터만으로도 활용 가능한
-  **응급실 혼잡도 예측 방법의 가능성 분석**
+* Demonstrated the feasibility of building an
+  **emergency department congestion prediction system using publicly available statistical data**
 
 ---
 
@@ -156,23 +153,24 @@ colsample_bytree = 0.8
 
 ## 👥 Team
 
-**성신여자대학교 AI융합학부 4인 공동 연구**
+**Department of AI Convergence, Sungshin Women's University**
 
-* 이예림
-* 김한솜
-* 나유진
-* 오윤지
+4-person collaborative research project:
 
+* Hansom Kim
+* Yujin Na
+* Yunji Oh
+* Yerim Lee
 
-데이터 전처리, Feature Engineering, 모델 학습 및 성능 평가를
-팀원 전원이 공동으로 수행했습니다.
+Data preprocessing, feature engineering, model training, and performance evaluation
+were conducted collaboratively by all team members.
 
 ---
 
 ## 🏆 Publication
 
-**KSC 2025 — 한국정보과학회 한국소프트웨어종합학술대회**
+**KSC 2025 — Korea Software Congress**
 
-본 연구는 **KSC 2025 포스터 세션**에서 발표되었습니다.
+This research was presented in the **poster session at KSC 2025**.
 
-
+📄 [KSC 2025 Poster](POSTER-PDF-LINK)
