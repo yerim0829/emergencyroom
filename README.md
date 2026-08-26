@@ -1,3 +1,7 @@
+
+[한국어 README ](./README_Korean.md)
+
+
 # ED Congestion Prediction
 
 > **Predicting Emergency Department Congestion with Synthetic Time Series and Machine Learning**
